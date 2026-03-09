@@ -9,7 +9,7 @@ Type=simple
 User=__APP__
 Group=__APP__
 WorkingDirectory=__DATA_DIR__/
-ExecStart=/usr/bin/qbittorrent-nox --webui-port=__PORT__ --profile=__DATA_DIR__
+ExecStart=__INSTALL_DIR__/qbittorrent-nox --webui-port=__PORT__ --profile=__DATA_DIR__
 Restart=on-failure
 RestartSec=5
 NoNewPrivileges=yes
