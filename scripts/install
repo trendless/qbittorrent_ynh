@@ -3,24 +3,16 @@
 source /usr/share/yunohost/helpers
 
 #=================================================
-# SYSTEM CONFIGURATION
+# DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
-ynh_script_progression "Adding system configurations related to $app ..."
+ynh_script_progression "Setting up source files..."
 
-# Create a dedicated NGINX config using the conf/nginx.conf template
-ynh_config_add_nginx
+ynh_setup_source --dest_dir="$install_dir"
 
-# Create a dedicated systemd config
-ynh_config_add_systemd
-
-log_dir="$data_dir/logs"
-mkdir -p "$log_dir"
-touch "$log_dir/qbittorrent.log"
-
-yunohost service add $app --description="qBittorrent-nox service"
-
-# Use logrotate to manage application logfile(s)
-ynh_config_add_logrotate
+#=================================================
+# ADD APP CONFIGURATION
+#=================================================
+ynh_script_progression "Adding app configurations..."
 
 config_dir="$data_dir/qBittorrent/config"
 mkdir -p "$config_dir"
@@ -32,6 +24,37 @@ chown -R $app: "$install_dir"
 chmod 600 "$config_dir/qBittorrent.conf"
 
 #=================================================
+# BUILD APP
+#=================================================
+ynh_script_progression "Building app..."
+
+pushd "$install_dir"
+    ynh_hide_warnings ynh_exec_as_app cmake -B build -DCMAKE_BUILD_TYPE=Release -DGUI=OFF
+    ynh_hide_warnings ynh_exec_as_app cmake --build build
+    ynh_hide_warnings ynh_exec_as_app cmake --install build
+popd
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression "Adding system configurations..."
+
+# Create a dedicated NGINX config using the conf/nginx.conf template
+ynh_config_add_nginx
+
+# Create a dedicated systemd config
+ynh_config_add_systemd
+
+log_dir="$data_dir/logs"
+mkdir -p "$log_dir"
+touch "$log_dir/qbittorrent.log"
+
+yunohost service add "$app" --description="qBittorrent-nox service"
+
+# Use logrotate to manage application logfile(s)
+ynh_config_add_logrotate
+
+#=================================================
 # YUNOHOST MULTIMEDIA INTEGRATION
 #=================================================
 ynh_script_progression "Adding multimedia directories..."
@@ -39,12 +62,12 @@ ynh_script_progression "Adding multimedia directories..."
 # Build YunoHost multimedia directories
 ynh_multimedia_build_main_dir
 
-ynh_multimedia_addfolder --source_dir="$data_dir" --dest_dir="share/Torrents"
+ynh_multimedia_addfolder --source_dir="$data_dir" --dest_dir="share/torrents"
 
 #=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression "Starting $app's systemd service..."
+ynh_script_progression "Starting systemd service..."
 
 # Start a systemd service
 ynh_systemctl --service=$app --action=start --wait_until="Now listening on IP" --log_path="$data_dir/qBittorrent/data/logs/qbittorrent.log" --timeout=30
@@ -52,4 +75,4 @@ ynh_systemctl --service=$app --action=start --wait_until="Now listening on IP" -
 #=================================================
 # END OF SCRIPT
 #=================================================
-ynh_script_progression "Installation of $app completed"
+ynh_script_progression "Installation complete."
