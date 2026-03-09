@@ -5,9 +5,9 @@ name = "qBittorrent"
 description.en = "Bittorrent client that aims to be a good alternative to all other bittorrent clients."
 description.fr = "Client bittorrent qui vise à être une bonne alternative à tous les autres clients bittorrent"
 
-version = "4.2.5~ynh3"
+version = "5.1.4~ynh1"
 
-maintainers = ["kay0u"]
+maintainers = [""]
 
 [upstream]
 license = "GPL-3.0-or-later"
@@ -35,11 +35,19 @@ ram.runtime = "50M"
 
     [install.path]
     type = "path"
-    default = "/qbittorrent"
+    default = "/"
 
 [resources]
-    [resources.system_user]
 
+    [resources.sources]
+
+        [resources.sources.main]
+        amd64.url = "https://github.com/qbittorrent/qBittorrent/archive/9cd8544bf4d279a5ad3b6dd3a1c6d99e6aeb0d8d.tar.gz"
+	    amd64.sha256 = "7481ca60e5421562dbad158b8aaf0a17295c49e06cb9361cb901aea067cc3136"
+
+    [resources.system_user]
+    allow_email = true
+    
     [resources.install_dir]
 
     [resources.data_dir]
@@ -52,7 +60,13 @@ ram.runtime = "50M"
     api.allowed = "visitors"
 
     [resources.ports]
-    main.default = 30000
 
     [resources.apt]
-    packages = "qbittorrent-nox"
+    packages = [ 
+        "libboost-dev",
+        "libtorrent-rasterbar-dev",
+        "libssl-dev",
+        "zlib1g-dev",
+        "cmake",
+        "python3"
+    ]
